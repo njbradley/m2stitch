@@ -66,7 +66,7 @@ def find_local_max_integer_constrained(
     return x, value
 
 
-def refine_translations(images: NumArray, grid: pd.DataFrame, r: Float) -> pd.DataFrame:
+def refine_translations(images: NumArray, grid: pd.DataFrame, r: Float, silent: bool = False) -> pd.DataFrame:
     """Refine the translations using the normalized cross correlation.
 
     Parameters
@@ -77,6 +77,8 @@ def refine_translations(images: NumArray, grid: pd.DataFrame, r: Float) -> pd.Da
         the dataframe for the grid position, with columns "{left|top}_{x|y}_second"
     r : Float
         the repeatability
+    silent : bool default False
+        supresses all printing to the console
 
     Returns
     -------
@@ -84,7 +86,7 @@ def refine_translations(images: NumArray, grid: pd.DataFrame, r: Float) -> pd.Da
         the refined grid position, with columns "{left|top}_{x|y|ncc}"
     """
     for direction in ["left", "top"]:
-        for i2, g in tqdm(grid.iterrows(), total=len(grid)):
+        for i2, g in (grid.iterrows() if silent else tqdm(grid.iterrows(), total=len(grid))):
             i1 = g[direction]
             if pd.isna(i1):
                 continue

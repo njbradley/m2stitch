@@ -55,6 +55,7 @@ def stitch_images(
     full_output: bool = False,
     row_col_transpose: bool = True,
     ncc_threshold: Float = 0.5,
+    silent: bool = False,
 ) -> Tuple[pd.DataFrame, dict]:
     """Compute image positions for stitching.
 
@@ -94,6 +95,10 @@ def stitch_images(
     ncc_threshold : Float, default 0.5
         the threshold of the normalized cross correlation used to select the initial
         stitched pairs.
+    
+    silent : bool, default False
+        if True, supresses all printing to the console. Normally a progress bar
+        is displayed.
 
     Returns
     -------
@@ -165,7 +170,7 @@ def stitch_images(
 
     ###### translationComputation ######
     for direction in ["left", "top"]:
-        for i2, g in tqdm(grid.iterrows(), total=len(grid)):
+        for i2, g in (grid.iterrows() if silent else tqdm(grid.iterrows(), total=len(grid))):
             i1 = g[direction]
             if pd.isna(i1):
                 continue
@@ -248,7 +253,7 @@ def stitch_images(
     grid = filter_by_repeatability(grid, r, ncc_threshold)
     grid = replace_invalid_translations(grid)
 
-    grid = refine_translations(images, grid, r)
+    grid = refine_translations(images, grid, r, silent)
 
     tree = compute_maximum_spanning_tree(grid)
     grid = compute_final_position(grid, tree)
