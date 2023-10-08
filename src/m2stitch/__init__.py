@@ -7,6 +7,6 @@ microscope images
 __author__ = """Yohsuke T. Fukai"""
 __email__ = "ysk@yfukai.net"
 
-from .stitching import stitch_images
+from .stitching import stitch_images, calculate_offset
 
-__all__ = ["stitch_images"]
+__all__ = ["stitch_images", "calculate_offset"]

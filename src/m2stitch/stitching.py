@@ -109,7 +109,7 @@ def stitch_images(
     prop_dict : dict
         the dict of estimated parameters. (to be documented)
     """
-    images = np.array(images)
+    images = np.asarray(images)
     assert (position_indices is not None) or (rows is not None and cols is not None)
     if position_indices is None:
         if row_col_transpose:
@@ -119,7 +119,7 @@ def stitch_images(
             position_indices = np.array([cols, rows]).T
         else:
             position_indices = np.array([rows, cols]).T
-    position_indices = np.array(position_indices)
+    position_indices = np.asarray(position_indices)
     assert images.shape[0] == position_indices.shape[0]
     assert position_indices.shape[1] == images.ndim - 1
     if position_initial_guess is not None:
@@ -167,6 +167,24 @@ def stitch_images(
                 grid.loc[ind, f"{direction}_{dimension}_init_guess"] = (
                     g[f"{dimension}_pos_init_guess"] - g2[f"{dimension}_pos_init_guess"]
                 )
+    
+    if ncc_threshold is None:
+        ncc_vals = []
+        for i in range(len(images)):
+            for j in range(len(images)):
+                if i == j: continue
+
+                PCM = pcm(image1, image2).real
+                yins, xins, _ = multi_peak_max(PCM)
+                max_peak = interpret_translation(image1, image2, yins, xins, -sizeY, sizeY, -sizeX, sizeX)
+                ncc_vals.append(max_peak[0])
+
+        import matplotlib.pyplot as plt
+        fig, axis = plt.subplots()
+        axis.bar(*np.unique(ncc_vals, return_counts=True))
+        axis.set_title("hist of ncc values")
+        fig.savefig('plots/ncc_hist.png')
+        ncc_threshold = 923
 
     ###### translationComputation ######
     for direction in ["left", "top"]:
@@ -271,3 +289,4 @@ def stitch_images(
         return grid, prop_dict
     else:
         return grid[["row", "col", "y_pos", "x_pos"]], prop_dict
+
